@@ -11,9 +11,6 @@ from threading import Thread
 db = SqliteDatabase('main.db')
 group_id = "-30666517"
 
-def makedate(str_date):
-    return datetime.date(1, 1, 1)
-
 
 class Post(Model):
     post_id = CharField()
@@ -32,6 +29,7 @@ db.create_tables([Post])
 
 session = vk.Session("aa22c986aa22c986aa22c9865caa484959aaa22aa22c986f6f45353aaf11232557bca25")
 api = vk.API(session)
+
 
 def main_worker(group_id):
     global Post, api
@@ -53,10 +51,11 @@ def main_worker(group_id):
                     current_doc = Post(post_id=latest_post['items'][0]["id"],
                                        doc_header=doc_data["header"],
                                        doc_link=link,
-                                       date_publish=makedate(doc_data["date_publish"]),
+                                       date_publish=datetime.datetime.fromtimestamp(doc_data["date_publish"]),
                                        post_viewers_estimated=analyzer.checkpost(post_data),
                                        doc_viewers_estimated=analyzer.checkdoc(doc_data))
                     current_doc.save()
+
 
 app = Flask(__name__)
 app.secret_key = 'jrfasefasefgj'
@@ -65,10 +64,10 @@ posts_file = open('posts.json', 'r')
 posts = json.loads(posts_file.read())
 posts_file.close()
 
-num_pages = len(posts)/10
+num_pages = len(posts) / 10
 
 if num_pages > round(num_pages):
-    num_pages = round(num_pages)+1
+    num_pages = round(num_pages) + 1
 else:
     num_pages = round(num_pages)
 
@@ -79,9 +78,10 @@ def index():
         page = int(request.args.get('page', 0))
     except:
         page = 0
-    start = page*10
-    end = (page+1)*10
+    start = page * 10
+    end = (page + 1) * 10
     return render_template('index.html', posts=posts[start:end], pages=num_pages)
+
 
 t = Thread(target=main_worker, args=[group_id])
 t.start()

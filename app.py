@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, session, redirect, url_for
 import json
-import parser
+from .parser import parsers
 import time
 import analyzer
 import vk
@@ -39,7 +39,7 @@ def main_worker(group_id):
     global Post, api
     while True:
         latest_post = api.wall.get(owner_id=group_id, count="1", v="5.95")
-        post_data = parser.parsepost(latest_post)
+        post_data = parsers.parsepost(latest_post)
         file = open('file.txt', 'w')
         file.write(str(latest_post))
         file.close()
@@ -51,7 +51,7 @@ def main_worker(group_id):
                 if Post.select().where(Post.doc_link == link).count() != 0:
                     continue
                 else:
-                    doc_data = parser.parsedoc()
+                    doc_data = parsers.parsedoc(link)
                     current_doc = Post(post_id=latest_post['items'][0]["id"],
                                        doc_header=doc_data["header"],
                                        doc_link=link,

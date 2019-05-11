@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, session, redirect, url_for
 import json
 import time
 import requests
+from pytrends.request import TrendReq
 from urllib.request import urlopen, Request
 import bleach
 from bs4 import BeautifulSoup
@@ -15,15 +16,33 @@ db = SqliteDatabase('main.db')
 group_id = "-30666517"
 
 
+def trends(topic):
+    score = 0
+    time = str(datetime.datetime.now())
+    year = int(time[0:4])
+    month = int(time[5:7])
+    day = int(time[8:10])
+    hour = int(time[11:13])
+    pytrends = TrendReq(hl='ru-RU', tz=360)
+    smth = \
+    pytrends.get_historical_interest([topic], year_start=year, month_start=month, day_start=day - 7, hour_start=hour,
+                                     year_end=year,
+                                     month_end=month, day_end=day, hour_end=hour, cat=0, geo='', gprop='', sleep=0)[
+        topic]
+    for i in range(0, 167):
+        score += smth[-i]
+    score = float(score / 168)
+    return score
+
+
 def parsepost(post):
     pic_num = 0
     doc_num = 0
     if_poll, if_longread, text_link = None, None, None
     vid_num = 0
-    if_poll = False
-    if_longread = False
     links = []
-    items = post['items'][1]
+    views = post['response']['items'][0]['views']['count']
+    items = post['response']['items'][0]
     for i in range(len(items['attachments'])):
         if items['attachments'][i]['type'] == 'photo':
             pic_num += 1
@@ -40,12 +59,8 @@ def parsepost(post):
             if_poll = True
         if items['attachments'][i]['type'] == 'doc':
             doc_num += 1
-    return {"pic_num": pic_num,
-            "doc_num": doc_num,
-            "vid_num": vid_num,
-            "if_poll": if_poll,
-            "if_longread": if_longread,
-            "links": links}
+    return {"pic_num": pic_num, "doc_num": doc_num, "vid_num": vid_num, "if_poll": if_poll, "if_longread": if_longread,
+            "links": links, 'views': views}
 
 
 def parsedoc(url):

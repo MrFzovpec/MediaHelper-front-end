@@ -1,4 +1,5 @@
 beautifulsoup4==4.7.1
+bleach==3.1.0
 certifi==2019.3.9
 chardet==3.0.4
 Click==7.0
@@ -7,12 +8,19 @@ Flask==1.0.2
 idna==2.8
 itsdangerous==1.1.0
 Jinja2==2.10.1
+lxml==4.3.3
 MarkupSafe==1.1.1
+numpy==1.16.3
+pandas==0.24.2
 peewee==3.9.5
+python-dateutil==2.8.0
+pytrends==4.4.0
+pytz==2019.1
 requests==2.21.0
 six==1.12.0
 soupsieve==1.9.1
 urllib3==1.24.3
 vk==2.0.2
 vk-api==11.4.0
+webencodings==0.5.1
 Werkzeug==0.15.2

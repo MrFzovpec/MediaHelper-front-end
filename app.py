@@ -1,7 +1,10 @@
 from flask import Flask, render_template, request, session, redirect, url_for
 import json
-from parser import *
 import time
+import requests
+from urllib.request import urlopen, Request
+import bleach
+from bs4 import BeautifulSoup
 import analyzer
 import vk
 import datetime
@@ -10,6 +13,61 @@ from threading import Thread
 
 db = SqliteDatabase('main.db')
 group_id = "-30666517"
+
+
+def parsepost(post):
+    pic_num = 0
+    doc_num = 0
+    if_poll, if_longread, text_link = None, None, None
+    vid_num = 0
+    if_poll = False
+    if_longread = False
+    links = []
+    items = post['items'][0]
+    for i in range(len(items['attachments'])):
+        if items['attachments'][i]['type'] == 'photo':
+            pic_num += 1
+        if items['attachments'][i]['type'] == 'video':
+            vid_num += 1
+        if items['attachments'][i]['type'] == 'link' and 'm.vk.com/@' in items['attachments'][i]['link']['url']:
+            if_longread = True
+            text_link = items['attachments'][i]['link']['url']
+            html = requests.get(text_link).text
+            soup = BeautifulSoup(html, 'html.parser').find()
+            for k in soup.find_all('a', title=True):
+                links.append(k['title'])
+        if items['attachments'][i]['type'] == 'poll':
+            if_poll = True
+        if items['attachments'][i]['type'] == 'doc':
+            doc_num += 1
+    return {"pic_num": pic_num,
+            "doc_num": doc_num,
+            "vid_num": vid_num,
+            "if_poll": if_poll,
+            "if_longread": if_longread,
+            "links": links}
+
+
+def parsedoc(url):
+    page = urlopen(Request(url, headers={'User-Agent': 'Mozilla'}))
+    soup = BeautifulSoup(page, features="html.parser")
+    for div in soup.find_all("div", {'id': "comments"}):
+        div.decompose()
+    for footer in soup.find_all("footer", {'id': "footer"}):
+        footer.decompose()
+    code = len(soup.find_all('code'))
+    img = len(soup.find_all('img'))
+    clean = soup.find('time')
+    clean2 = soup.find('h1')
+    headline2 = soup.find_all('h2')
+    headlines = len(headline2)
+    time = bleach.clean(str(clean), tags=[], strip=True)
+    title = bleach.clean(str(clean2), tags=[], strip=True)
+    return {"title": title,
+            "time": time,
+            "headlines": headlines,
+            "img": img,
+            "code": code}
 
 
 class Post(Model):
@@ -35,10 +93,8 @@ def main_worker(group_id):
     global Post, api
     while True:
         latest_post = api.wall.get(owner_id=group_id, count="1", v="5.95")
-        file = open('file.txt', 'w')
+        print(latest_post)
         post_data = parsepost(latest_post)
-        file.write(str(post_data))
-        file.close()
         if Post.select().where(Post.post_id == latest_post['items'][0]["id"]).count() == len(post_data["links"]):
             time.sleep(60)
             continue
@@ -47,11 +103,11 @@ def main_worker(group_id):
                 if Post.select().where(Post.doc_link == link).count() != 0:
                     continue
                 else:
-                    doc_data =  parsedoc()
+                    doc_data = parsedoc(link)
                     current_doc = Post(post_id=latest_post['items'][0]["id"],
-                                       doc_header=doc_data["header"],
+                                       doc_header=doc_data["title"],
                                        doc_link=link,
-                                       date_publish=datetime.datetime.fromtimestamp(doc_data["date_publish"]),
+                                       date_publish=datetime.datetime.fromtimestamp(latest_post['items'][0]['date']),
                                        post_viewers_estimated=analyzer.checkpost(post_data),
                                        doc_viewers_estimated=analyzer.checkdoc(doc_data))
                     current_doc.save()

@@ -10,7 +10,7 @@ def parsepost(post):
     if_poll = False
     if_longread = False
     links = []
-    items = post['response']['items'][0]
+    items = post['items'][0]
     for i in range(len(items['attachments'])):
         if items['attachments'][i]['type'] == 'photo':
             pic_num += 1

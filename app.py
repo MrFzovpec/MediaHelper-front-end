@@ -36,9 +36,12 @@ api = vk.API(session)
 def main_worker(group_id):
     global Post, api
     while True:
-        latest_post = api.wall.get(owner_id=group_id, count="1", v="5.95")["items"]
+        latest_post = api.wall.get(owner_id=group_id, count="1", v="5.95")
+        file = open('file.txt', 'w')
         post_data = parser.parsepost(latest_post)
-        if Post.select().where(Post.post_id == latest_post["id"]).count() == len(post_data["links"]):
+        file.write(str(post_data))
+        file.close()
+        if Post.select().where(Post.post_id == latest_post['items'][0]["id"]).count() == len(post_data["links"]):
             time.sleep(60)
             continue
         else:
@@ -46,8 +49,8 @@ def main_worker(group_id):
                 if Post.select().where(Post.doc_link == link).count() != 0:
                     continue
                 else:
-                    doc_data = parser.parsedoc(link)
-                    current_doc = Post(post_id=latest_post["id"],
+                    doc_data = parser.parsedoc()
+                    current_doc = Post(post_id=latest_post['items'][0]["id"],
                                        doc_header=doc_data["header"],
                                        doc_link=link,
                                        date_publish=makedate(doc_data["date_publish"]),

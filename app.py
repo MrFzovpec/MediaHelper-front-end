@@ -53,9 +53,9 @@ def main_worker(group_id):
                 else:
                     doc_data = parsers.parsedoc(link)
                     current_doc = Post(post_id=latest_post['items'][0]["id"],
-                                       doc_header=doc_data["header"],
+                                       doc_header=doc_data["title"],
                                        doc_link=link,
-                                       date_publish=makedate(doc_data["date_publish"]),
+                                       date_publish=makedate(doc_data["time"]),
                                        post_viewers_estimated=analyzer.checkpost(post_data),
                                        doc_viewers_estimated=analyzer.checkdoc(doc_data))
                     current_doc.save()

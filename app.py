@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, session, redirect, url_for
 import json
-from parser import parsers
+import parser as parsers
 import time
 import analyzer
 import vk

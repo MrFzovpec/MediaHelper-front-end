@@ -23,7 +23,7 @@ def parsepost(post):
     if_poll = False
     if_longread = False
     links = []
-    items = post['items'][0]
+    items = post['items'][1]
     for i in range(len(items['attachments'])):
         if items['attachments'][i]['type'] == 'photo':
             pic_num += 1
@@ -92,10 +92,10 @@ api = vk.API(session)
 def main_worker(group_id):
     global Post, api
     while True:
-        latest_post = api.wall.get(owner_id=group_id, count="1", v="5.95")
+        latest_post = api.wall.get(owner_id=group_id, count="2", v="5.95")
         print(latest_post)
         post_data = parsepost(latest_post)
-        if Post.select().where(Post.post_id == latest_post['items'][0]["id"]).count() == len(post_data["links"]):
+        if Post.select().where(Post.post_id == latest_post['items'][1]["id"]).count() == len(post_data["links"]):
             time.sleep(60)
             continue
         else:
@@ -104,10 +104,10 @@ def main_worker(group_id):
                     continue
                 else:
                     doc_data = parsedoc(link)
-                    current_doc = Post(post_id=latest_post['items'][0]["id"],
+                    current_doc = Post(post_id=latest_post['items'][1]["id"],
                                        doc_header=doc_data["title"],
                                        doc_link=link,
-                                       date_publish=datetime.datetime.fromtimestamp(latest_post['items'][0]['date']),
+                                       date_publish=datetime.datetime.fromtimestamp(latest_post['items'][1]['date']),
                                        post_viewers_estimated=analyzer.checkpost(post_data),
                                        doc_viewers_estimated=analyzer.checkdoc(doc_data))
                     current_doc.save()

@@ -41,24 +41,25 @@ def parsepost(post):
     if_poll, if_longread, text_link = None, None, None
     vid_num = 0
     links = []
-    views = post['response']['items'][0]['views']['count']
-    items = post['response']['items'][0]
-    for i in range(len(items['attachments'])):
-        if items['attachments'][i]['type'] == 'photo':
-            pic_num += 1
-        if items['attachments'][i]['type'] == 'video':
-            vid_num += 1
-        if items['attachments'][i]['type'] == 'link' and 'm.vk.com/@' in items['attachments'][i]['link']['url']:
-            if_longread = True
-            text_link = items['attachments'][i]['link']['url']
-            html = requests.get(text_link).text
-            soup = BeautifulSoup(html, 'html.parser').find()
-            for k in soup.find_all('a', title=True):
-                links.append(k['title'])
-        if items['attachments'][i]['type'] == 'poll':
-            if_poll = True
-        if items['attachments'][i]['type'] == 'doc':
-            doc_num += 1
+    views = post['response']['items'][1]['views']['count']
+    items = post['response']['items'][1]
+    if 'attachments' in items[k]:
+        for i in range(len(items['attachments'])):
+            if items['attachments'][i]['type'] == 'photo':
+                pic_num += 1
+            if items['attachments'][i]['type'] == 'video':
+                vid_num += 1
+            if items['attachments'][i]['type'] == 'link' and 'm.vk.com/@' in items['attachments'][i]['link']['url']:
+                if_longread = True
+                text_link = items['attachments'][i]['link']['url']
+                html = requests.get(text_link).text
+                soup = BeautifulSoup(html, 'html.parser').find()
+                for k in soup.find_all('a', title=True):
+                    links.append(k['title'])
+            if items['attachments'][i]['type'] == 'poll':
+                if_poll = True
+            if items['attachments'][i]['type'] == 'doc':
+                doc_num += 1
     return {"pic_num": pic_num, "doc_num": doc_num, "vid_num": vid_num, "if_poll": if_poll, "if_longread": if_longread,
             "links": links, 'views': views}
 
@@ -100,7 +101,7 @@ class Post(Model):
 db.connect()
 db.create_tables([Post])
 
-session = vk.Session("aa22c986aa22c986aa22c9865caa484959aaa22aa22c986f6f45353aaf11232557bca25")
+session = vk.Session("ef2d5debef2d5debef2d5debbaef47df34eef2def2d5debb3fbae47f8675a0656bd4369")
 api = vk.API(session)
 
 

@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, session, redirect, url_for
 import json
 import time
 import requests
+from pytrends.request import TrendReq
 from urllib.request import urlopen, Request
 import bleach
 from bs4 import BeautifulSoup
@@ -15,37 +16,52 @@ db = SqliteDatabase('main.db')
 group_id = "-30666517"
 
 
+def trends(topic):
+    score = 0
+    time = str(datetime.datetime.now())
+    year = int(time[0:4])
+    month = int(time[5:7])
+    day = int(time[8:10])
+    hour = int(time[11:13])
+    pytrends = TrendReq(hl='ru-RU', tz=360)
+    smth = \
+    pytrends.get_historical_interest([topic], year_start=year, month_start=month, day_start=day - 7, hour_start=hour,
+                                     year_end=year,
+                                     month_end=month, day_end=day, hour_end=hour, cat=0, geo='', gprop='', sleep=0)[
+        topic]
+    for i in range(0, 167):
+        score += smth[-i]
+    score = float(score / 168)
+    return score
+
+
 def parsepost(post):
     pic_num = 0
     doc_num = 0
     if_poll, if_longread, text_link = None, None, None
     vid_num = 0
-    if_poll = False
-    if_longread = False
     links = []
-    items = post['items'][1]
-    for i in range(len(items['attachments'])):
-        if items['attachments'][i]['type'] == 'photo':
-            pic_num += 1
-        if items['attachments'][i]['type'] == 'video':
-            vid_num += 1
-        if items['attachments'][i]['type'] == 'link' and 'm.vk.com/@' in items['attachments'][i]['link']['url']:
-            if_longread = True
-            text_link = items['attachments'][i]['link']['url']
-            html = requests.get(text_link).text
-            soup = BeautifulSoup(html, 'html.parser').find()
-            for k in soup.find_all('a', title=True):
-                links.append(k['title'])
-        if items['attachments'][i]['type'] == 'poll':
-            if_poll = True
-        if items['attachments'][i]['type'] == 'doc':
-            doc_num += 1
-    return {"pic_num": pic_num,
-            "doc_num": doc_num,
-            "vid_num": vid_num,
-            "if_poll": if_poll,
-            "if_longread": if_longread,
-            "links": links}
+    views = post['response']['items'][1]['views']['count']
+    items = post['response']['items'][1]
+    if 'attachments' in items[k]:
+        for i in range(len(items['attachments'])):
+            if items['attachments'][i]['type'] == 'photo':
+                pic_num += 1
+            if items['attachments'][i]['type'] == 'video':
+                vid_num += 1
+            if items['attachments'][i]['type'] == 'link' and 'm.vk.com/@' in items['attachments'][i]['link']['url']:
+                if_longread = True
+                text_link = items['attachments'][i]['link']['url']
+                html = requests.get(text_link).text
+                soup = BeautifulSoup(html, 'html.parser').find()
+                for k in soup.find_all('a', title=True):
+                    links.append(k['title'])
+            if items['attachments'][i]['type'] == 'poll':
+                if_poll = True
+            if items['attachments'][i]['type'] == 'doc':
+                doc_num += 1
+    return {"pic_num": pic_num, "doc_num": doc_num, "vid_num": vid_num, "if_poll": if_poll, "if_longread": if_longread,
+            "links": links, 'views': views}
 
 
 def parsedoc(url):
@@ -85,7 +101,7 @@ class Post(Model):
 db.connect()
 db.create_tables([Post])
 
-session = vk.Session("aa22c986aa22c986aa22c9865caa484959aaa22aa22c986f6f45353aaf11232557bca25")
+session = vk.Session("ef2d5debef2d5debef2d5debbaef47df34eef2def2d5debb3fbae47f8675a0656bd4369")
 api = vk.API(session)
 
 

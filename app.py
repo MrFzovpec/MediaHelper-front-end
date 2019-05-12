@@ -116,7 +116,7 @@ def main_worker(group_id):
     while True:
         latest_post = api.wall.get(owner_id=group_id, count="2", v="5.95")
         # print(latest_post)
-        post_data = parsepost(latest_post)
+        post_data = parsepost(latest_post)[1]
         if Post.select().where(Post.post_id == latest_post['items'][1]["id"]).count() == len(post_data["links"]):
             time.sleep(60)
             continue

@@ -137,18 +137,16 @@ def main_worker(group_id):
 app = Flask(__name__)
 app.secret_key = 'jrfasefasefgj'
 
-size = Post.select().count()
-num_pages = size / 10
-
-if num_pages > round(num_pages):
-    num_pages = round(num_pages) + 1
-else:
-    num_pages = round(num_pages)
-
-
 
 @app.route('/', methods=['GET'])
 def index():
+    size = Post.select().count()
+    num_pages = size / 10
+
+    if num_pages > round(num_pages):
+        num_pages = round(num_pages) + 1
+    else:
+        num_pages = round(num_pages)
     stn = ""
     stp = ""
 
@@ -166,7 +164,7 @@ def index():
             'date': post.date_publish,
             'rating': post.doc_viewers_estimated,
             'link': post.doc_link,
-            'status': statuses[randrange(0,3)]
+            'status': statuses[randrange(0,0)]
         })
     if page + 1 >= num_pages:
         stn = 'disabled'

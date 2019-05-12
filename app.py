@@ -75,12 +75,11 @@ def parsedoc(url):
     div = soup.find('div', {'class': "entry-content"})
     OUT_TEXT = str(div).split('<h2>')
     par = OUT_TEXT[0].split('<p>')
-    par2 = []
     for i in par:
         if '</p>' in i:
-            clean = bleach.clean(i, tags=[], strip=True)
-            par2.append(clean)
-    content = ' '.join(par2)
+            clean3 = bleach.clean(i, tags=[], strip=True)
+            break
+    content = clean3
     return {"title": title,
             "time": time,
             "headlines": headlines,
@@ -183,4 +182,4 @@ def index():
 t = Thread(target=main_worker, args=[group_id])
 t.start()
 
-app.run(debug=True, port=5000)
+app.run(debug=False, port=80)

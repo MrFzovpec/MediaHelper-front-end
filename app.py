@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, session, redirect, url_for
 import json
 import time
 import requests
+from random import randrange
 from pytrends.request import TrendReq
 from urllib.request import urlopen, Request
 import bleach
@@ -122,7 +123,6 @@ def main_worker(group_id):
     global Post, api
     while True:
         latest_post = api.wall.get(owner_id=group_id, count="2", v="5.95")
-        # print(latest_post)
         post_data = parsepost(latest_post)[1]
         if Post.select().where(Post.post_id == latest_post['items'][1]["id"]).count() == len(post_data["links"]):
             time.sleep(60)
@@ -146,16 +146,14 @@ def main_worker(group_id):
 app = Flask(__name__)
 app.secret_key = 'jrfasefasefgj'
 
-posts_file = open('posts.json', 'r')
-posts = json.loads(posts_file.read())
-posts_file.close()
-
-num_pages = len(posts) / 10
+size = Post.select().count()
+num_pages = size / 10
 
 if num_pages > round(num_pages):
     num_pages = round(num_pages) + 1
 else:
     num_pages = round(num_pages)
+
 
 
 @app.route('/', methods=['GET'])
@@ -165,8 +163,18 @@ def index():
     except:
         page = 0
     start = page * 10
-    end = (page + 1) * 10
-    return render_template('index.html', posts=posts[start:end], pages=num_pages)
+    posts_list = []
+    statuses = ['GOOD', 'NOT GOOD', 'SUCCSESS']
+    for post in Post.select().offset(start).limit(10):
+        posts_list.append({
+            'title': post.doc_header,
+            'text': post.post_text,
+            'date': post.date_publish,
+            'rating': post.doc_viewers_estimated,
+            'link': post.doc_link,
+            'status': statuses[randrange(0,3)]
+        })
+    return render_template('index.html', posts=posts_list, pages=num_pages)
 
 
 t = Thread(target=main_worker, args=[group_id])

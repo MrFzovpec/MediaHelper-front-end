@@ -41,7 +41,10 @@ def parsepost(posts):
                     html = requests.get(text_link).text
                     soup = BeautifulSoup(html, 'html.parser').find()
                     for f in soup.find_all('a', title=True):
-                        links.append(f['title'])
+                        if not "tproger" in f['title']:
+                            continue
+                        else:
+                            links.append(f['title'])
                 if items[k]['attachments'][i]['type'] == 'poll':
                     if_poll = True
                 if items[k]['attachments'][i]['type'] == 'doc':
@@ -181,10 +184,7 @@ def index():
                 post['status'] = 'SUCCESS'
             else:
                 post['status'] = 'GOOD'
-        if post['title']:
-            posts_list.append(post)
-        else:
-            pass
+
 
     if page + 1 >= num_pages:
         stn = 'disabled'
@@ -194,11 +194,10 @@ def index():
         nvs = False
     else:
         nvs = True
-    print(posts_list)
     return render_template('index.html', posts=posts_list, pages=num_pages, page=page, status_next=stn, status_prev=stp, nav_status=nvs)
 
 
 t = Thread(target=main_worker, args=[group_id])
 t.start()
-if __name__ == '__main__':
-    app.run(debug=False, port=8080, host='0.0.0.0')
+
+app.run(debug=False, port=8080)

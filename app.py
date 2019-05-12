@@ -39,8 +39,7 @@ def parsepost(posts):
                     html = requests.get(text_link).text
                     soup = BeautifulSoup(html, 'html.parser').find()
                     for f in soup.find_all('a', title=True):
-                        if f["title"] != "https://tproger.ru/":
-                            links.append(f['title'])
+                        links.append(f['title'])
                 if items[k]['attachments'][i]['type'] == 'poll':
                     if_poll = True
                 if items[k]['attachments'][i]['type'] == 'doc':
@@ -112,7 +111,8 @@ def main_worker(group_id):
     global Post, api
     while True:
         latest_post = api.wall.get(owner_id=group_id, count="2", v="5.95")
-        post_data = parsepost(latest_post)[1]
+        raw_data = parsepost(latest_post)
+        post_data = raw_data[1]
         if Post.select().where(Post.post_id == latest_post['items'][1]["id"]).count() >= len(post_data["links"]):
             time.sleep(60)
             continue
@@ -130,7 +130,8 @@ def main_worker(group_id):
                                        post_viewers_estimated=-1,
                                        doc_viewers_estimated=int(analyzer.checkdoc(doc_data) +
                                                                  analyzer.checkpost(post_data) / 2))
-                    current_doc.save()
+                    if not Post.select().where(Post.doc_link == link).exists():
+                        current_doc.save()
             time.sleep(120)
 
 

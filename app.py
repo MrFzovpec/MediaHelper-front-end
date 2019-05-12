@@ -74,10 +74,16 @@ def parsedoc(url):
     div = soup.find('div', {'class': "entry-content"})
     OUT_TEXT = str(div).split('<h2>')
     par = OUT_TEXT[0].split('<p>')
+    clean3 = ''
     for i in par:
         if '</p>' in i:
             clean3 = bleach.clean(i, tags=[], strip=True)
-            break
+            if clean3 != "":
+                try:
+                    clean3 = clean3.replace('\xa0', ' ')
+                except:
+                    pass
+                break
     content = clean3
     return {"title": title,
             "time": time,

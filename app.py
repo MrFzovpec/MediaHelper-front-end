@@ -181,10 +181,7 @@ def index():
                 post['status'] = 'SUCCESS'
             else:
                 post['status'] = 'GOOD'
-        if post['title']:
-            posts_list.append(post)
-        else:
-            pass
+        
 
     if page + 1 >= num_pages:
         stn = 'disabled'
@@ -194,7 +191,6 @@ def index():
         nvs = False
     else:
         nvs = True
-    print(posts_list)
     return render_template('index.html', posts=posts_list, pages=num_pages, page=page, status_next=stn, status_prev=stp, nav_status=nvs)
 
 

@@ -10,7 +10,7 @@ import vk
 import datetime
 from peewee import *
 from threading import Thread
-from werkzeug.contrib.fixers import ProxyFix
+
 import requests
 
 db = SqliteDatabase('main.db')
@@ -164,7 +164,7 @@ def index():
     except:
         page = 0
     start = page * 10
-    statuses = ['GOOD', 'NOT GOOD', 'SUCCSESS']
+    posts_list = []
     for post in Post.select().offset(start).limit(10):
         post = {
             'title': post.doc_header,
@@ -172,14 +172,19 @@ def index():
             'date': post.date_publish,
             'rating': post.doc_viewers_estimated,
             'link': post.doc_link,
+            'status': ''
         }
         if post['rating'] < 20000:
             post['status'] = 'NOT GOOD'
-        if post['rating'] >= 20000:
-            post['status'] = 'GOOD'
-        if post['rating'] >= 50000:
-            post['status'] = 'SUCCSESS'
-        posts_list.append(post)
+        elif post['rating'] >= 20000:
+            if post['rating'] >= 50000:
+                post['status'] = 'SUCCESS'
+            else:
+                post['status'] = 'GOOD'
+        if post['title']:
+            posts_list.append(post)
+        else:
+            pass
 
     if page + 1 >= num_pages:
         stn = 'disabled'
@@ -189,10 +194,11 @@ def index():
         nvs = False
     else:
         nvs = True
+    print(posts_list)
     return render_template('index.html', posts=posts_list, pages=num_pages, page=page, status_next=stn, status_prev=stp, nav_status=nvs)
 
 
 t = Thread(target=main_worker, args=[group_id])
 t.start()
-
-app.run(debug=False, port=8080)
+if __name__ == '__main__':
+    app.run(debug=False, port=8080, host='0.0.0.0')

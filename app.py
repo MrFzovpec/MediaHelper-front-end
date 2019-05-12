@@ -41,7 +41,11 @@ def parsepost(posts):
                     html = requests.get(text_link).text
                     soup = BeautifulSoup(html, 'html.parser').find()
                     for f in soup.find_all('a', title=True):
+<<<<<<< HEAD
                         if not "tproger" in f['title']:
+=======
+                        if not "tproger.ru" in f['title']:
+>>>>>>> 463ce4d399b86254a69ad49917527fa9be6332e5
                             continue
                         else:
                             links.append(f['title'])
@@ -184,7 +188,11 @@ def index():
                 post['status'] = 'SUCCESS'
             else:
                 post['status'] = 'GOOD'
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> 463ce4d399b86254a69ad49917527fa9be6332e5
 
     if page + 1 >= num_pages:
         stn = 'disabled'

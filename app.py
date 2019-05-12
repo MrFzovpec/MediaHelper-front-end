@@ -46,6 +46,7 @@ def parsepost(posts):
     for k in range(len(items)):
         if "attachments" in items[k]:
             views = items[k]['views']['count']
+            text = items[k]['text']
             for i in range(len(items[k]['attachments'])):
                 if items[k]['attachments'][i]['type'] == 'photo':
                     pic_num += 1
@@ -94,6 +95,7 @@ def parsedoc(url):
 
 class Post(Model):
     post_id = CharField()
+    post_text = CharField()
     doc_header = CharField()
     doc_link = CharField()
     date_publish = DateField()
@@ -127,6 +129,7 @@ def main_worker(group_id):
                 else:
                     doc_data = parsedoc(link)
                     current_doc = Post(post_id=latest_post['items'][1]["id"],
+                                       post_text = post_data["text"]
                                        doc_header=doc_data["title"],
                                        doc_link=link,
                                        date_publish=datetime.datetime.fromtimestamp(latest_post['items'][1]['date']),

@@ -1,4 +1,12 @@
 from pytrends.request import TrendReq
+import datetime
+from catboost import CatBoostRegressor, Pool
+
+post_model = CatBoostRegressor()
+doc_model = CatBoostRegressor()
+
+post_model.load_model("models/posts_model")
+doc_model.load_model("models/doc_model")
 
 
 def trends(topic):
@@ -48,8 +56,13 @@ def magic(title):
 
 
 def checkpost(post_data):
-    return 100_000_000
+    global post_model
+    kostil = [[post_data["doc_num"], post_data["if_longread"], post_data["if_poll"], post_data["pic_num"],
+               post_data["vid_num"], len(post_data["links"])]]
+    return post_model.predict(kostil)[0]
 
 
 def checkdoc(doc_data):
-    return 100_000_000
+    global doc_model
+    kostil = [[doc_data["code"], doc_data["headlines"], doc_data["img"], magic(doc_data["title"])]]
+    return post_model.predict(kostil)[0]

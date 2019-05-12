@@ -10,6 +10,8 @@ import vk
 import datetime
 from peewee import *
 from threading import Thread
+from werkzeug.contrib.fixers import ProxyFix
+import requests
 
 db = SqliteDatabase('main.db')
 group_id = "-30666517"
@@ -57,7 +59,7 @@ def parsepost(posts):
 
 
 def parsedoc(url):
-    page = urlopen(Request(url, headers={'User-Agent': 'Mozilla'}))
+    page = requests.get(url, headers={'User-Agent': 'Mozilla'}).text
     soup = BeautifulSoup(page, features="html.parser")
     for div in soup.find_all("div", {'id': "comments"}):
         div.decompose()
@@ -162,17 +164,23 @@ def index():
     except:
         page = 0
     start = page * 10
-    posts_list = []
     statuses = ['GOOD', 'NOT GOOD', 'SUCCSESS']
     for post in Post.select().offset(start).limit(10):
-        posts_list.append({
+        post = {
             'title': post.doc_header,
             'text': post.post_text,
             'date': post.date_publish,
             'rating': post.doc_viewers_estimated,
             'link': post.doc_link,
-            'status': statuses[randrange(0, 1)]
-        })
+        }
+        if post['rating'] < 20000:
+            post['status'] = 'NOT GOOD'
+        if post['rating'] >= 20000:
+            post['status'] = 'GOOD'
+        if post['rating'] >= 50000:
+            post['status'] = 'SUCCSESS'
+        posts_list.append(post)
+
     if page + 1 >= num_pages:
         stn = 'disabled'
     if page == 0:
@@ -187,4 +195,4 @@ def index():
 t = Thread(target=main_worker, args=[group_id])
 t.start()
 
-app.run()
+app.run(debug=False, port=8080)

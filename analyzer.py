@@ -1,3 +1,6 @@
+from pytrends.request import TrendReq
+
+
 def trends(topic):
     score = 0
     time = str(datetime.datetime.now())

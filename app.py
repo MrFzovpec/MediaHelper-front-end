@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, session, redirect, url_for
 import json
 import time
 import requests
-from pytrends.request import TrendReq
 from urllib.request import urlopen, Request
 import bleach
 from bs4 import BeautifulSoup

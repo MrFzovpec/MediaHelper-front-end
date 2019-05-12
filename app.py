@@ -115,7 +115,7 @@ def main_worker(group_id):
     global Post, api
     while True:
         latest_post = api.wall.get(owner_id=group_id, count="2", v="5.95")
-        print(latest_post)
+        # print(latest_post)
         post_data = parsepost(latest_post)
         if Post.select().where(Post.post_id == latest_post['items'][1]["id"]).count() == len(post_data["links"]):
             time.sleep(60)
@@ -164,4 +164,4 @@ def index():
 t = Thread(target=main_worker, args=[group_id])
 t.start()
 
-app.run(debug=True, port=8080)
+app.run(debug=True, port=5000)

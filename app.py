@@ -103,6 +103,7 @@ class Post(Model):
     post_text = CharField()
     doc_header = CharField()
     doc_link = CharField()
+    pic_link = CharField()
     date_publish = DateField()
     post_viewers_estimated = IntegerField()
     doc_viewers_estimated = IntegerField()
@@ -137,6 +138,7 @@ def main_worker(group_id):
                                        post_text=doc_data["content"],
                                        doc_header=doc_data["title"],
                                        doc_link=link,
+                                       pic_link = doc_data["img_link"]
                                        date_publish=datetime.datetime.fromtimestamp(latest_post['items'][1]['date']),
                                        post_viewers_estimated=-1,
                                        doc_viewers_estimated=int(analyzer.checkdoc(doc_data) +
@@ -207,4 +209,4 @@ def index():
 t = Thread(target=main_worker, args=[group_id])
 t.start()
 
-app.run(debug=False, port=8080)
+app.run(debug=False, port=8080, host='0.0.0.0')

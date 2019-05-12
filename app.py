@@ -2,8 +2,11 @@ from flask import Flask, render_template, request, session, redirect, url_for
 import json
 import time
 import requests
+<<<<<<< HEAD
 from random import randrange
 from pytrends.request import TrendReq
+=======
+>>>>>>> a4af3ee028a4cc7db5e14924315ec0e5e303a42b
 from urllib.request import urlopen, Request
 import bleach
 from bs4 import BeautifulSoup
@@ -15,25 +18,6 @@ from threading import Thread
 
 db = SqliteDatabase('main.db')
 group_id = "-30666517"
-
-
-def trends(topic):
-    score = 0
-    time = str(datetime.datetime.now())
-    year = int(time[0:4])
-    month = int(time[5:7])
-    day = int(time[8:10])
-    hour = int(time[11:13])
-    pytrends = TrendReq(hl='ru-RU', tz=360)
-    smth = \
-    pytrends.get_historical_interest([topic], year_start=year, month_start=month, day_start=day - 7, hour_start=hour,
-                                     year_end=year,
-                                     month_end=month, day_end=day, hour_end=hour, cat=0, geo='', gprop='', sleep=0)[
-        topic]
-    for i in range(0, 167):
-        score += smth[-i]
-    score = float(score / 168)
-    return score
 
 
 def parsepost(posts):
@@ -72,7 +56,7 @@ def parsepost(posts):
                        "if_longread": if_longread,
                        "links": links,
                        'views': views,
-                       "text" : text}
+                       "text": text}
                 rets.append(ret)
     return rets
 
@@ -115,7 +99,7 @@ class Post(Model):
 db.connect()
 db.create_tables([Post])
 
-session = vk.Session("ef2d5debef2d5debef2d5debbaef47df34eef2def2d5debb3fbae47f8675a0656bd4369")
+session = vk.Session("fc228d8ffc228d8ffc228d8f11fc4808c7ffc22fc228d8fa0f557cd9bdf2aa6c74effa8")
 api = vk.API(session)
 
 
@@ -134,12 +118,13 @@ def main_worker(group_id):
                 else:
                     doc_data = parsedoc(link)
                     current_doc = Post(post_id=latest_post['items'][1]["id"],
-                                       post_text = post_data["text"],
+                                       post_text=post_data["text"],
                                        doc_header=doc_data["title"],
                                        doc_link=link,
                                        date_publish=datetime.datetime.fromtimestamp(latest_post['items'][1]['date']),
-                                       post_viewers_estimated=analyzer.checkpost(post_data),
-                                       doc_viewers_estimated=analyzer.checkdoc(doc_data))
+                                       post_viewers_estimated=-1,
+                                       doc_viewers_estimated=max(analyzer.checkdoc(doc_data),
+                                                                 analyzer.checkpost(post_data)))
                     current_doc.save()
 
 

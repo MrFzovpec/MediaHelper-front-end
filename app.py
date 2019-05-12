@@ -166,7 +166,7 @@ def index():
             'date': post.date_publish,
             'rating': post.doc_viewers_estimated,
             'link': post.doc_link,
-            'status': statuses[randrange(0,3)]
+            'status': statuses[randrange(0,0)]
         })
     if page + 1 >= num_pages:
         stn = 'disabled'

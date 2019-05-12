@@ -2,11 +2,8 @@ from flask import Flask, render_template, request, session, redirect, url_for
 import json
 import time
 import requests
-<<<<<<< HEAD
 from random import randrange
 from pytrends.request import TrendReq
-=======
->>>>>>> a4af3ee028a4cc7db5e14924315ec0e5e303a42b
 from urllib.request import urlopen, Request
 import bleach
 from bs4 import BeautifulSoup

@@ -172,4 +172,4 @@ def index():
 t = Thread(target=main_worker, args=[group_id])
 t.start()
 
-app.run(debug=True, port=5000)
+app.run(debug=False, port=80)

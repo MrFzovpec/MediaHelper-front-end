@@ -49,7 +49,7 @@
 						<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
 						<circle cx="12" cy="13" r="4"></circle>
 					</svg>
-					<strong>Media Helper</strong>
+					<strong>Media Analyzer</strong>
 				</a>
 				<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader" aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
 					<span class="navbar-toggler-icon"></span>
@@ -61,19 +61,21 @@
 		{% block content %}
 		{% endblock %}
 	</div>
+	{% if nav_status == True %}
 	<nav aria-label="Page navigation example">
 		<ul class="pagination justify-content-center">
-			<li class="page-item disabled">
-				<a class="page-link" href="{{ page - 1 }}" tabindex="-1" aria-disabled="true">Previous</a>
+			<li class="page-item {{ status_prev }}">
+				<a class="page-link" href="page={{ page - 1 }}" tabindex="-1" aria-disabled="true">Previous</a>
 			</li>
 			{% for i in range(0, pages) %}
 			<li class="page-item"><a class="page-link" href="/?page={{ i }}">{{ i + 1 }}</a></li>
 			{% endfor %}
-			<li class="page-item ">
-				<a class="page-link" href="{{ page + 1 }}">Next</a>
+			<li class="page-item {{ status_next }}">
+				<a class="page-link" href="/?page={{ page + 1 }}">Next</a>
 			</li>
 		</ul>
 	</nav>
+	{% endif %}
 	<footer class="blog-footer">
 		<p>Blog built for <a target="black" href="http://mediahack.me/">Mediahack</a> by <a target="black" href="https://vk.com/gppetr">Petr Govorukhin</a>.</p>
 		<p>

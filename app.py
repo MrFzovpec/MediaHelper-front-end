@@ -150,6 +150,9 @@ else:
 
 @app.route('/', methods=['GET'])
 def index():
+    stn = ""
+    stp = ""
+
     try:
         page = int(request.args.get('page', 0))
     except:
@@ -166,7 +169,15 @@ def index():
             'link': post.doc_link,
             'status': statuses[randrange(0,3)]
         })
-    return render_template('index.html', posts=posts_list, pages=num_pages)
+    if page + 1 >= num_pages:
+        stn = 'disabled'
+    if page == 0:
+        stp = 'disabled'
+    if num_pages <= 1:
+        nvs = False
+    else:
+        nvs = True
+    return render_template('index.html', posts=posts_list, pages=num_pages, page=page, status_next=stn, status_prev=stp, nav_status=nvs)
 
 
 t = Thread(target=main_worker, args=[group_id])

@@ -113,7 +113,7 @@ def main_worker(group_id):
     while True:
         latest_post = api.wall.get(owner_id=group_id, count="2", v="5.95")
         post_data = parsepost(latest_post)[1]
-        if Post.select().where(Post.post_id == latest_post['items'][1]["id"]).count() == len(post_data["links"]):
+        if Post.select().where(Post.post_id == latest_post['items'][1]["id"]).count() >= len(post_data["links"]):
             time.sleep(60)
             continue
         else:
@@ -129,9 +129,9 @@ def main_worker(group_id):
                                        date_publish=datetime.datetime.fromtimestamp(latest_post['items'][1]['date']),
                                        post_viewers_estimated=-1,
                                        doc_viewers_estimated=int(analyzer.checkdoc(doc_data) +
-                                                                 analyzer.checkpost(post_data)/2))
+                                                                 analyzer.checkpost(post_data) / 2))
                     current_doc.save()
-            time.sleep(60)
+            time.sleep(120)
 
 
 app = Flask(__name__)
@@ -164,7 +164,7 @@ def index():
             'date': post.date_publish,
             'rating': post.doc_viewers_estimated,
             'link': post.doc_link,
-            'status': statuses[randrange(0,0)]
+            'status': statuses[randrange(0, 1)]
         })
     if page + 1 >= num_pages:
         stn = 'disabled'

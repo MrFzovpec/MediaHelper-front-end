@@ -115,7 +115,7 @@ def main_worker(group_id):
                 else:
                     doc_data = parsedoc(link)
                     current_doc = Post(post_id=latest_post['items'][1]["id"],
-                                       post_text=post_data["text"],
+                                       post_text=doc_data["text"],
                                        doc_header=doc_data["title"],
                                        doc_link=link,
                                        date_publish=datetime.datetime.fromtimestamp(latest_post['items'][1]['date']),
@@ -123,6 +123,7 @@ def main_worker(group_id):
                                        doc_viewers_estimated=max(analyzer.checkdoc(doc_data),
                                                                  analyzer.checkpost(post_data)))
                     current_doc.save()
+            time.sleep(60)
 
 
 app = Flask(__name__)

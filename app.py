@@ -115,7 +115,7 @@ def main_worker(group_id):
                 else:
                     doc_data = parsedoc(link)
                     current_doc = Post(post_id=latest_post['items'][1]["id"],
-                                       post_text=doc_data["text"],
+                                       # post_text=doc_data["text"],
                                        doc_header=doc_data["title"],
                                        doc_link=link,
                                        date_publish=datetime.datetime.fromtimestamp(latest_post['items'][1]['date']),
@@ -157,7 +157,7 @@ def index():
             'link': post.doc_link,
             'status': statuses[randrange(0,3)]
         })
-    return render_template('index.html', posts=posts_list, pages=num_pages)
+    return render_template('index.html', posts=posts_list, pages=num_pages, page=page)
 
 
 t = Thread(target=main_worker, args=[group_id])

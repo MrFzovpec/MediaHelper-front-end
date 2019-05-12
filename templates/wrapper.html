@@ -13,13 +13,14 @@
 	<title>Media Analyzer</title>
 </head>
 <style>
-    .sub_menu_numbers{
+	.sub_menu_numbers{
         list-style: none;
     }
     .sub_menu_numbers li{
         display: inline;
     }
 </style>
+
 <body>
 	<header>
 		<div class="collapse bg-dark" id="navbarHeader">
@@ -56,15 +57,23 @@
 			</div>
 		</div>
 	</header>
-    <div class="main-content container">
-            {% block content %}
-            {% endblock %}
-    </div>
-    <ul class="sub_menu_numbers">
-    {% for i in range(0, pages) %}
-        <li><a href="/?page={{ i }}">{{ i + 1 }}</a></li>
-    {% endfor %}
-    </ul>
+	<div class="main-content container">
+		{% block content %}
+		{% endblock %}
+	</div>
+	<nav aria-label="Page navigation example">
+		<ul class="pagination justify-content-center">
+			<li class="page-item disabled">
+				<a class="page-link" href="{{ page - 1 }}" tabindex="-1" aria-disabled="true">Previous</a>
+			</li>
+			{% for i in range(0, pages) %}
+			<li class="page-item"><a class="page-link" href="/?page={{ i }}">{{ i + 1 }}</a></li>
+			{% endfor %}
+			<li class="page-item ">
+				<a class="page-link" href="{{ page + 1 }}">Next</a>
+			</li>
+		</ul>
+	</nav>
 	<footer class="blog-footer">
 		<p>Blog built for <a target="black" href="http://mediahack.me/">Mediahack</a> by <a target="black" href="https://vk.com/gppetr">Petr Govorukhin</a>.</p>
 		<p>

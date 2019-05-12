@@ -90,12 +90,19 @@ def parsedoc(url):
                     pass
                 break
     content = clean3
+    img2 = soup.find_all('img', src=True)
+    img3 = []
+    for i in img2:
+        if 'https://cdn.tproger.ru/wp-content/uploads' in i['src']:
+            img3.append(i['src'])
+    img_link = img3[0]
     return {"title": title,
             "time": time,
             "headlines": headlines,
             "img": img,
             "code": code,
-            "content": content}
+            "content": content,
+            "img_link": img_link}
 
 
 class Post(Model):
@@ -138,7 +145,7 @@ def main_worker(group_id):
                                        post_text=doc_data["content"],
                                        doc_header=doc_data["title"],
                                        doc_link=link,
-                                       pic_link = doc_data["img_link"]
+                                       pic_link = doc_data["img_link"],
                                        date_publish=datetime.datetime.fromtimestamp(latest_post['items'][1]['date']),
                                        post_viewers_estimated=-1,
                                        doc_viewers_estimated=int(analyzer.checkdoc(doc_data) +
@@ -177,7 +184,8 @@ def index():
             'date': post.date_publish,
             'rating': post.doc_viewers_estimated,
             'link': post.doc_link,
-            'status': ''
+            'status': '',
+            'image': post.pic_link
         }
         if post['rating'] < 20000:
             post['status'] = 'NOT GOOD'

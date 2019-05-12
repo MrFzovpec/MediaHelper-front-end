@@ -1,9 +1,7 @@
 from flask import Flask, render_template, request, session, redirect, url_for
-import json
 import time
 import requests
 from random import randrange
-from pytrends.request import TrendReq
 from urllib.request import urlopen, Request
 import bleach
 from bs4 import BeautifulSoup
@@ -41,7 +39,8 @@ def parsepost(posts):
                     html = requests.get(text_link).text
                     soup = BeautifulSoup(html, 'html.parser').find()
                     for f in soup.find_all('a', title=True):
-                        links.append(f['title'])
+                        if f["title"] != "https://tproger.ru/":
+                            links.append(f['title'])
                 if items[k]['attachments'][i]['type'] == 'poll':
                     if_poll = True
                 if items[k]['attachments'][i]['type'] == 'doc':
@@ -73,11 +72,21 @@ def parsedoc(url):
     headlines = len(headline2)
     time = bleach.clean(str(clean), tags=[], strip=True)
     title = bleach.clean(str(clean2), tags=[], strip=True)
+    div = soup.find('div', {'class': "entry-content"})
+    OUT_TEXT = str(div).split('<h2>')
+    par = OUT_TEXT[0].split('<p>')
+    par2 = []
+    for i in par:
+        if '</p>' in i:
+            clean = bleach.clean(i, tags=[], strip=True)
+            par2.append(clean)
+    content = ' '.join(par2)
     return {"title": title,
             "time": time,
             "headlines": headlines,
             "img": img,
-            "code": code}
+            "code": code,
+            "content": content}
 
 
 class Post(Model):
@@ -115,13 +124,13 @@ def main_worker(group_id):
                 else:
                     doc_data = parsedoc(link)
                     current_doc = Post(post_id=latest_post['items'][1]["id"],
-                                       post_text=doc_data["text"],
+                                       post_text=doc_data["content"],
                                        doc_header=doc_data["title"],
                                        doc_link=link,
                                        date_publish=datetime.datetime.fromtimestamp(latest_post['items'][1]['date']),
                                        post_viewers_estimated=-1,
-                                       doc_viewers_estimated=max(analyzer.checkdoc(doc_data),
-                                                                 analyzer.checkpost(post_data)))
+                                       doc_viewers_estimated=int(analyzer.checkdoc(doc_data) +
+                                                                 analyzer.checkpost(post_data)/2))
                     current_doc.save()
             time.sleep(60)
 

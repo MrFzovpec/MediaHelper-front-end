@@ -18,6 +18,7 @@ peewee==3.9.5
 python-dateutil==2.8.0
 pytrends==4.4.0
 pytz==2019.1
+regex==2019.4.14
 requests==2.21.0
 six==1.12.0
 soupsieve==1.9.1

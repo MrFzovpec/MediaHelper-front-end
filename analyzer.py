@@ -1,5 +1,7 @@
 from pytrends.request import TrendReq
 import datetime
+import pandas as pd
+import regex as re
 from catboost import CatBoostRegressor, Pool
 
 post_model = CatBoostRegressor()
@@ -29,8 +31,7 @@ def trends(topic):
     return score
 
 
-def magic(title):
-    global cache
+def magic(title, cache):
     points = 0
     words = title.split()
     to_trends = []
@@ -39,7 +40,6 @@ def magic(title):
             to_trends.append(word)
     for word in to_trends:
         word = re.sub(r"[!.,:;»?]+$", '', word)
-        print(word)
         if word in cache:
             points += cache[word]
             continue
@@ -57,12 +57,23 @@ def magic(title):
 
 def checkpost(post_data):
     global post_model
-    kostil = [[post_data["doc_num"], post_data["if_longread"], post_data["if_poll"], post_data["pic_num"],
-               post_data["vid_num"], len(post_data["links"])]]
+    kostil = pd.DataFrame([
+        {"doc_num": post_data["doc_num"],
+         "if_longread": post_data["if_longread"],
+         "if_poll": post_data["if_poll"],
+         "pic_num": post_data["pic_num"],
+         "vid_num": post_data["vid_num"],
+         "links_count": len(post_data["links"])}])
     return post_model.predict(kostil)[0]
 
 
 def checkdoc(doc_data):
+    cache = {}
     global doc_model
-    kostil = [[doc_data["code"], doc_data["headlines"], doc_data["img"], magic(doc_data["title"])]]
-    return post_model.predict(kostil)[0]
+    thing = magic(doc_data["title"], cache)
+    kostil = pd.DataFrame([
+        {"code": doc_data["code"],
+         "headlines": doc_data["headlines"],
+         "img": doc_data["img"],
+         "trends": thing}])
+    return doc_model.predict(kostil)[0]

@@ -64,9 +64,14 @@ def parsepost(posts):
                     if_poll = True
                 if items[k]['attachments'][i]['type'] == 'doc':
                     doc_num += 1
-                ret = {"pic_num": pic_num, "doc_num": doc_num, "vid_num": vid_num, "if_poll": if_poll,
+                ret = {"pic_num": pic_num,
+                       "doc_num": doc_num,
+                       "vid_num": vid_num,
+                       "if_poll": if_poll,
                        "if_longread": if_longread,
-                       "links": links, 'views': views}
+                       "links": links,
+                       'views': views,
+                       "text" : text}
                 rets.append(ret)
     return rets
 
@@ -129,7 +134,7 @@ def main_worker(group_id):
                 else:
                     doc_data = parsedoc(link)
                     current_doc = Post(post_id=latest_post['items'][1]["id"],
-                                       post_text = post_data["text"]
+                                       post_text = post_data["text"],
                                        doc_header=doc_data["title"],
                                        doc_link=link,
                                        date_publish=datetime.datetime.fromtimestamp(latest_post['items'][1]['date']),

@@ -96,7 +96,7 @@ class Post(Model):
 db.connect()
 db.create_tables([Post])
 
-session = vk.Session("fc228d8ffc228d8ffc228d8f11fc4808c7ffc22fc228d8fa0f557cd9bdf2aa6c74effa8")
+session = vk.Session("1d1bfc251d1bfc251d1bfc25711d7179af11d1b1d1bfc2541cc153bc247feb77367395e")
 api = vk.API(session)
 
 

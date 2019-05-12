@@ -95,7 +95,10 @@ def parsedoc(url):
     for i in img2:
         if 'https://cdn.tproger.ru/wp-content/uploads' in i['src']:
             img3.append(i['src'])
-    img_link = img3[0]
+    try:
+        img_link = img3[0]
+    except:
+        img_link = 'https://cdn.tproger.ru/wp-content/uploads/2016/06/tpbooksmini.jpg'
     return {"title": title,
             "time": time,
             "headlines": headlines,

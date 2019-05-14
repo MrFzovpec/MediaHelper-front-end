@@ -1,3 +1,8 @@
+import requests
+import bleach
+from bs4 import BeautifulSoup
+
+
 def parsepost(posts):
     pic_num = 0
     doc_num = 0

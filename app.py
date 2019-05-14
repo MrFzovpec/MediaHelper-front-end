@@ -1,15 +1,10 @@
 import datetime
 import time
-from random import randrange
 from threading import Thread
-from urllib.request import Request, urlopen
 
-import bleach
-import requests
 import vk
-from bs4 import BeautifulSoup
-from flask import Flask, redirect, render_template, request, session, url_for
-from peewee import *
+from flask import Flask, render_template, request, session
+from peewee import Model, CharField, DateField, IntegerField, SqliteDatabase
 
 import analyzer
 from parsers import parsedoc, parsepost
@@ -40,8 +35,7 @@ session = vk.Session(
 api = vk.API(session)
 
 
-def main_worker(group_id):
-    global Post, api
+def main_worker():
     while True:
         latest_post = api.wall.get(owner_id=group_id, count="2", v="5.95")
         raw_data = parsepost(latest_post)

@@ -144,4 +144,4 @@ def index():
 worker_thread = Thread(target=main_worker)
 worker_thread.start()
 
-app.run(debug=False, port=8080, host='0.0.0.0')
+app.run(debug=True, port=8080, host='0.0.0.0')

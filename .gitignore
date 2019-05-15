@@ -50,3 +50,11 @@ coverage.xml
 docs/_build/
 
 main.db
+
+venv
+
+.idea
+
+.vscode
+
+.DS_Store

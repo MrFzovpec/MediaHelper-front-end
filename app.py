@@ -1,16 +1,8 @@
-from flask import Flask, render_template, request, session, redirect, url_for
-import time
-import requests
-from random import randrange
-from urllib.request import urlopen, Request
-import bleach
-from bs4 import BeautifulSoup
-import analyzer
-import vk
 import datetime
-from peewee import *
+import time
 from threading import Thread
 
+<<<<<<< HEAD
 import requests
 
 db = SqliteDatabase('main.db')
@@ -108,11 +100,33 @@ def parsedoc(url):
             "code": code,
             "content": content,
             "img_link": img_link}
+=======
+import vk
+from flask import Flask, render_template, request
+from peewee import Model, CharField, DateField, IntegerField, SqliteDatabase
+
+import analyzer
+from parsers import parsedoc, parsepost
+
+DATABASE = SqliteDatabase('main.DATABASE')
+GROUP_ID = "-30666517"
+>>>>>>> 901f19d771d6b7acdca2ffed064f9267c7697502
 
 
 class Post(Model):
+    """
+    Model for peewee database, one line per text on tproger.com
+    post_id - string to get data about from what post we got the article
+    doc_text - first paragraph of article for frontend
+    doc_header - header of article for frontend
+    doc_link - link to original article for frontend
+    pic_link - link to picture from article for frontend
+    date_publish - date of post's publishment, converted from unixtime from VK's API
+    post_viewers_estimated - unused field. We had no time to re-develop DB structure, should do it later
+    doc_viewers_extimated - estimated viewers for article, based on models predictions for post's and article's viewers
+    """
     post_id = CharField()
-    post_text = CharField()
+    doc_text = CharField()
     doc_header = CharField()
     doc_link = CharField()
     pic_link = CharField()
@@ -121,20 +135,21 @@ class Post(Model):
     doc_viewers_estimated = IntegerField()
 
     class Meta:
-        database = db  # This model uses the "main.db" database.
+        database = DATABASE  # This model uses the "main.DATABASE" database.
 
 
-db.connect()
-db.create_tables([Post])
+DATABASE.connect()
+DATABASE.create_tables([Post])
 
-session = vk.Session("1d1bfc251d1bfc251d1bfc25711d7179af11d1b1d1bfc2541cc153bc247feb77367395e")
-api = vk.API(session)
+SESSION = vk.Session(
+    "1d1bfc251d1bfc251d1bfc25711d7179af11d1b1d1bfc2541cc153bc247feb77367395e")
+VK_API_SESSION = vk.API(SESSION)
 
 
-def main_worker(group_id):
-    global Post, api
+def main_worker():
     while True:
-        latest_post = api.wall.get(owner_id=group_id, count="2", v="5.95")
+        latest_post = VK_API_SESSION.wall.get(
+            owner_id=GROUP_ID, count="2", v="5.95")
         raw_data = parsepost(latest_post)
         post_data = raw_data[1]
         if Post.select().where(Post.post_id == latest_post['items'][1]["id"]).count() >= len(post_data["links"]):
@@ -147,12 +162,13 @@ def main_worker(group_id):
                 else:
                     doc_data = parsedoc(link)
                     current_doc = Post(post_id=latest_post['items'][1]["id"],
-                                       post_text=doc_data["content"],
+                                       doc_text=doc_data["content"],
                                        doc_header=doc_data["title"],
                                        doc_link=link,
-                                       pic_link = doc_data["img_link"],
-                                       date_publish=datetime.datetime.fromtimestamp(latest_post['items'][1]['date']),
-                                       post_viewers_estimated=-1,
+                                       pic_link=doc_data["img_link"],
+                                       date_publish=datetime.datetime.fromtimestamp(
+                                           latest_post['items'][1]['date']),
+                                       post_viewers_estimated=-1,  # WTF? We should definately rewrite database structure
                                        doc_viewers_estimated=int(analyzer.checkdoc(doc_data) +
                                                                  analyzer.checkpost(post_data) / 2))
                     if not Post.select().where(Post.doc_link == link).exists():
@@ -185,7 +201,7 @@ def index():
     for post in Post.select().offset(start).limit(10):
         post = {
             'title': post.doc_header,
-            'text': post.post_text,
+            'text': post.doc_text,
             'date': post.date_publish,
             'rating': post.doc_viewers_estimated,
             'link': post.doc_link,
@@ -199,13 +215,12 @@ def index():
                 post['status'] = 'SUCCESS'
             else:
                 post['status'] = 'GOOD'
-        if post['title'].lower()=='none':
+        if post['title'].lower() == 'none':
             post['title'] = ''
-        if (post['title'] == '' ) and (post['text'] == ''):
+        if (post['title'] == '') and (post['text'] == ''):
             pass
         else:
             posts_list.append(post)
-
 
     if page + 1 >= num_pages:
         stn = 'disabled'
@@ -216,10 +231,17 @@ def index():
     else:
         nvs = True
 
-    return render_template('index.html', posts=posts_list, pages=num_pages, page=page, status_next=stn, status_prev=stp, nav_status=nvs)
+    return render_template(
+        'index.html',
+        posts=posts_list,
+        pages=num_pages,
+        page=page,
+        status_next=stn,
+        status_prev=stp,
+        nav_status=nvs)
 
 
-t = Thread(target=main_worker, args=[group_id])
-t.start()
+worker_thread = Thread(target=main_worker)
+worker_thread.start()
 
 app.run(debug=False, port=8080, host='0.0.0.0')

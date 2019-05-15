@@ -79,7 +79,8 @@ def parsedoc(url):
     div = soup.find('div', {'class': "entry-content"})
     OUT_TEXT = str(div).split('<h2>')
     par = OUT_TEXT[0].split('<p>')
-    clean3 = ''
+    clean3 = None
+
     for i in par:
         if '</p>' in i:
             clean3 = bleach.clean(i, tags=[], strip=True)
@@ -99,6 +100,7 @@ def parsedoc(url):
         img_link = img3[0]
     except:
         img_link = 'https://cdn.tproger.ru/wp-content/uploads/2016/06/tpbooksmini.jpg'
+    print(code)
     return {"title": title,
             "time": time,
             "headlines": headlines,
